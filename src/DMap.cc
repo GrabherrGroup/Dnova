@@ -9,7 +9,7 @@
 int main( int argc, char** argv )
 {
   commandArg<string> tFileCmmd("-t","Target input fasta file");
-  commandArg<string> qFileCmmd("-q","Target input fasta file");
+  commandArg<string> qFileCmmd("-q","Query input fasta file");
   commandArg<int> dmerCmmd("-d","dmer length", 6);
   commandArg<int> motifLenCmmd("-ml","Motif Length", 4);
   commandArg<int> motifCntCmmd("-mc","Number of motifs to use", 1);
@@ -51,25 +51,15 @@ int main( int argc, char** argv )
 
   RestSiteModelParams mParams(singleStrand, motifLen, motifCnt, dmerLen, ndfCoef); 
   RestSiteDBMapper rsDBMapper(mParams);
-
-  clock_t clock1_optiLoad, clock2_overlapCand, clock3_finalOverlaps, clock4_done;
-  // 1a. Populate the motifs 
-  // 1b. Construct Restriction-site Reads
+  clock_t clock1_optiLoad, clock2_mapInstances;
   clock1_optiLoad = clock();
+  rsDBMapper.FindMatches(qFileName, tFileName); 
+  clock2_mapInstances = clock();
 
-  // 2. Build Optimers and find those that share a seed as cadidates for overlap detection 
-  MatchCandids finalOverlaps;
-  rsDBMapper.FindMatches(qFileName, tFileName, finalOverlaps); 
-  clock2_overlapCand = clock();
- 
-  // 3. Take the overlap candidates and refine to remove false positives
-  clock3_finalOverlaps = clock();
-  clock4_done = clock();
-
-
+/*
   cout << "Report runtime duration: " << endl;
   cout << " Loading Optical Reads: "  
-       << ((double) (clock2_overlapCand-clock1_optiLoad) / CLOCKS_PER_SEC)
+       << ((double) (clock2_mapInstances-clock1_optiLoad) / CLOCKS_PER_SEC)
        << endl;
   cout << " Finding Overlap Candidates: " 
        << ((double) (clock3_finalOverlaps-clock2_overlapCand) / CLOCKS_PER_SEC)
@@ -77,6 +67,6 @@ int main( int argc, char** argv )
   cout << " Refining and finalizing overlaps: " 
        << ((double) (clock4_done - clock3_finalOverlaps) / CLOCKS_PER_SEC)
        << endl;
-
+*/
   return 0;
 }

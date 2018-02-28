@@ -19,8 +19,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 include_directories(./)
 
 # DMap binaries
-set(SOURCE_FILES_SITELAPS ryggrad/src/base/ErrorHandling.cc ryggrad/src/base/FileParser.cc  ryggrad/src/base/StringUtil.cc ryggrad/src/general/DNAVector.cc ryggrad/src/util/mutil.cc src/RestSiteAlignUnit.cc src/SiteLaps.cc)  
-set(SOURCE_FILES_DMAP ryggrad/src/base/ErrorHandling.cc ryggrad/src/base/FileParser.cc  ryggrad/src/base/StringUtil.cc ryggrad/src/general/DNAVector.cc ryggrad/src/util/mutil.cc src/RestSiteAlignUnit.cc src/DMap.cc)  
+set(SOURCE_FILES_SITELAPS ryggrad/src/base/ErrorHandling.cc ryggrad/src/base/FileParser.cc  ryggrad/src/base/StringUtil.cc ryggrad/src/general/DNAVector.cc ryggrad/src/util/mutil.cc src/RestSiteAlignUnit.cc src/RSiteReads.cc src/DPMatcher.cc src/Dmers.cc src/RestSiteCoreUnit.cc src/SiteLaps.cc)  
+set(SOURCE_FILES_DMAP ryggrad/src/base/ErrorHandling.cc ryggrad/src/base/FileParser.cc  ryggrad/src/base/StringUtil.cc ryggrad/src/general/DNAVector.cc ryggrad/src/util/mutil.cc src/RestSiteAlignUnit.cc src/RSiteReads.cc src/DPMatcher.cc src/Dmers.cc src/RestSiteCoreUnit.cc src/DMap.cc)  
 
 add_executable(SiteLaps             ${SOURCE_FILES_SITELAPS}) 
 add_executable(DMap                 ${SOURCE_FILES_DMAP}) 
