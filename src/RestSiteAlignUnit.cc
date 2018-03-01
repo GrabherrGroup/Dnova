@@ -186,7 +186,7 @@ void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fi
       FILE_LOG(logDEBUG3) << "Finding dmer match candidates for read: " << rIdx; 
       matchCount += m_rsaCores[motif].FindSingleReadMapInstances(m_queryReads[motif][rIdx], rIdx, 0.08, checkedSeqs);
       if (rIdx % reportCnt== 0) {
-        cout << "\rLOG Progress: " << 100*(double)rIdx/(double)readCnt << "%" << flush;
+//        cout << "\rLOG Progress: " << 100*(double)rIdx/(double)readCnt << "%" << flush;
       }
     }
   }

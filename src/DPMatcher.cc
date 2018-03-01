@@ -31,7 +31,8 @@ float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2, const RSiteRea
       SetScore(hCoord, vCoord, currScore, editGrid);
     }
   }
-  float score = (float)maxCell/max(length1, length2);
+  //TODO: Overlap specifc score, this needs to be extended to more score types
+  float score = (float)maxCell/min(length1, length2);
   return score;
 }
 

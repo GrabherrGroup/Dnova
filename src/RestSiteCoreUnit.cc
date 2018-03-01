@@ -72,7 +72,7 @@ int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,int>
   for (int iterIndex=0; iterIndex<loopLim; iterIndex++) {
     counter++;
     if (counter % 100000 == 0) {
-      cout << "\rLOG Progress: " << 100*(double)iterIndex/(double)loopLim << "%" << flush;
+//      cout << "\rLOG Progress: " << 100*(double)iterIndex/(double)loopLim << "%" << flush;
     }
     if(!m_dmers[iterIndex].empty()) {
       FILE_LOG(logDEBUG2) << "Number of dmers in cell " << iterIndex << " " << m_dmers[iterIndex].isize(); 
@@ -129,7 +129,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
 bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2) const {
   DPMatcher validator;
   float matchScore = validator.FindMatchScore(dmer1, dmer2, Reads());
-  if(matchScore>0.9) { return true; }
+  if(matchScore>0.95) { return true; }
   else { return false; }
 }
 
