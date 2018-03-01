@@ -81,8 +81,8 @@ public:
   int  CreateRSitesPerString(const string& origString, const string& origName, RSiteReads& reads, bool addRC) const; 
 
   void BuildDmers(); 
-  void FindMapInstances(float indelVariance) const;
-  void FindSingleReadMapInstances(const RSiteRead& reads, int rIdx, float indelVariance) const; 
+  int FindMapInstances(float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
+  int FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
   int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const; 
   bool ValidateMatch(const Dmer& dmer1, const Dmer& dmer2) const; 
 

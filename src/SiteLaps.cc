@@ -11,8 +11,8 @@ int main( int argc, char** argv )
 
   commandArg<string> fileCmmd("-i","input fasta file");
   commandArg<int> dmerCmmd("-d","dmer length", 6);
-  commandArg<int> motifLenCmmd("-ml","Motif Length", 4);
-  commandArg<int> motifCntCmmd("-mc","Number of motifs to use", 1);
+  commandArg<int> motifLenCmmd("-ml","Motif Length", 6);
+  commandArg<int> motifCntCmmd("-mc","Number of motifs to use", 5);
   commandArg<bool> singleStrCmmd("-s", "1: if single strand or 0: if reverse complements should also be included", 0);
   commandArg<double> ndfcCmmd("-nc", "Coefficient to determine how much room to allow for differences in dmers", 1.0);
   commandArg<int>  coreCmmd("-n","Number of Cores to run with", 2);

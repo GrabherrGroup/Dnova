@@ -131,12 +131,15 @@ void RestSiteGeneral::SetTargetSites(const string& fileName, bool addRC) {
 
 void RestSiteMapper::FindMatches(const string& fileNameQuery, const string& fileNameTarget) {
   GenerateMotifs(); 
+  map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
+  int matchCount = 0;
   SetTargetSites(fileNameTarget, true);
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
     FILE_LOG(logDEBUG1) << "Finding matches based on motif: " << motif;
-    m_rsaCores[motif].FindMapInstances(0.08); //TODO parameterise data params
+    matchCount += m_rsaCores[motif].FindMapInstances(0.08, checkedSeqs); //TODO parameterise data params
   }
+  cout << "Total number of matches recorded: " << matchCount << endl;
 }
 
 void RestSiteDBMapper::SetQuerySites(const string& fileName) {
@@ -172,6 +175,8 @@ void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fi
   GenerateMotifs(); 
   SetTargetSites(fileNameTarget, true);
   SetQuerySites(fileNameQuery);  
+  map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
+  int matchCount = 0;
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
     int readCnt   = m_queryReads[motif].NumReads();
@@ -179,13 +184,14 @@ void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fi
     if(reportCnt == 0) { reportCnt = 1; }
     for(int rIdx=0; rIdx<readCnt; rIdx++) {
       FILE_LOG(logDEBUG3) << "Finding dmer match candidates for read: " << rIdx; 
-      m_rsaCores[motif].FindSingleReadMapInstances(m_queryReads[motif][rIdx], rIdx, 0.08);
+      matchCount += m_rsaCores[motif].FindSingleReadMapInstances(m_queryReads[motif][rIdx], rIdx, 0.08, checkedSeqs);
       if (rIdx % reportCnt== 0) {
         cout << "\rLOG Progress: " << 100*(double)rIdx/(double)readCnt << "%" << flush;
       }
     }
   }
   cout << endl;
+  cout << "Total number of matches recorded: " << matchCount << endl;
   //WriteMatchCandids(matchCandids.GetAllCandids());
 }
 

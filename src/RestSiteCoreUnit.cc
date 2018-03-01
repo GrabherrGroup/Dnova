@@ -65,8 +65,7 @@ void RestSiteMapCore::BuildDmers() {
   m_dmers.BuildDmers(m_rReads , m_modelParams.DmerLength(), m_modelParams.MotifLength(), dimCount); 
 }
 
-void RestSiteMapCore::FindMapInstances(float indelVariance) const {
-  map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
+int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,int>>& checkedSeqs) const {
   int counter       = 0;
   double matchCount = 0;
   int loopLim       = m_dmers.NumCells();
@@ -80,14 +79,13 @@ void RestSiteMapCore::FindMapInstances(float indelVariance) const {
       matchCount += HandleMappingInstance(m_dmers[iterIndex], indelVariance, checkedSeqs, false);
     }
   }
-  cout << "Total number of matches recorded: " << matchCount << endl;
+  return matchCount;
 }
 
-void RestSiteMapCore::FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance) const {
-  map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
+int RestSiteMapCore::FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,int>>& checkedSeqs) const {
   svec<Dmer> dmers;
   m_dmers.GenerateDmers(read, rIdx, dmers);
-  HandleMappingInstance(dmers, indelVariance, checkedSeqs, true);
+  return HandleMappingInstance(dmers, indelVariance, checkedSeqs, true);
 }
 
 int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const {
