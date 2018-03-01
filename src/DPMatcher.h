@@ -8,7 +8,7 @@ class DPMatcher{
 public:
   DPMatcher() {} 
 
-  float FindMatchScore(const MappedInstance& mapCandid, const RSiteReads& reads); 
+  float FindMatchScore(const Dmer& dm1, const Dmer& dm2, const RSiteReads& reads); 
 
 private:
   int GetScore(int hCoord, int vCoord, const vector<vector<int>>& editGrid); 

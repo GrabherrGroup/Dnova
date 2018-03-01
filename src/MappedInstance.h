@@ -8,34 +8,39 @@
 class MappedInstance
 {
 public:
-  MappedInstance(): m_rIdx1(-1), m_rIdx2(-1), m_rPos1(-1), m_rPos2(-1) {}
-  MappedInstance(int idx1, int idx2, int rp1, int rp2): m_rIdx1(idx1), m_rIdx2(idx2), m_rPos1(rp1), m_rPos2(rp2) {}
-  //Constructor to initialize from dmers
-  MappedInstance(const Dmer& dm1, const Dmer& dm2): 
-    m_rIdx1(dm1.Seq()), m_rIdx2(dm2.Seq()), m_rPos1(dm1.Pos()), m_rPos2(dm2.Pos()) {}
+  MappedInstance(): m_mappedIndex(-1), m_contactPos(-1), m_leftUncertain(-1), 
+                    m_rightUncertain(-1), m_direction(false), m_orient(false)  {}
+  MappedInstance(int mIdx, int cPos, int leftUc, int rightUc, bool dir, bool ori): m_mappedIndex(mIdx), m_contactPos(cPos), 
+                 m_leftUncertain(leftUc), m_rightUncertain(rightUc), m_direction(dir), m_orient(ori) {}
 
-  int GetFirstReadIndex() const  { return m_rIdx1;       }
-  int GetSecondReadIndex() const { return m_rIdx2;       }
-  int GetFirstMatchPos() const   { return m_rPos1;       }
-  int GetSecondMatchPos() const  { return m_rPos2;       }
+  int getMappedIndex() const     { return m_mappedIndex;      }  
+  int getContactPos() const      { return m_contactPos;       }  
+  int getLeftUncertain() const   { return m_leftUncertain;    }  
+  int getRightUncertain() const  { return m_rightUncertain;   }  
+  int getDirection() const       { return (m_direction)?1:-1; }
+  int getOrient() const          { return (m_orient)?1:-1;    }
+  bool getOrientBool() const     { return m_orient;           }
+  bool getDirectionBool() const  { return m_direction;        } 
 
   inline bool operator < (const MappedInstance& rhs) const {
-    return(tie(m_rIdx1, m_rIdx2, m_rPos1)
-       < tie(rhs.m_rIdx1, rhs.m_rIdx2, rhs.m_rPos1)); //keep the same order
+    return(tie(m_mappedIndex, m_contactPos)
+       < tie(rhs.m_mappedIndex, rhs.m_contactPos)); //keep the same order
   }
 
   inline bool operator == (const MappedInstance& rhs) const {
-    return(tie(m_rIdx1, m_rIdx2, m_rPos1)
-       == tie(rhs.m_rIdx1, rhs.m_rIdx2, rhs.m_rPos2)); //keep the same order
+    return(tie(m_mappedIndex, m_contactPos)
+       == tie(rhs.m_mappedIndex, rhs.m_contactPos)); //keep the same order
   }
 
   string ToString() const;
 
 private:
-  int m_rIdx1;        /// The index of the first read
-  int m_rIdx2;        /// The index of the second read 
-  int m_rPos1;        /// Position of match in first read 
-  int m_rPos2;        /// Position of match in second read 
+    int     m_mappedIndex;    /// The index of the sequence to which this item refers to
+    int     m_contactPos;     /// The index in the read where this mapping occurs from 
+    int     m_leftUncertain;  /// Number of bases uncertain from the left of the mapping
+    int     m_rightUncertain; /// Number of bases uncertain from the right of the mapping 
+    bool    m_direction;      /// The direction of the overlap (true (+1): right  false (-1): left) 
+    bool    m_orient;         /// The overlap orientat (Whether the reads are of the same strand) - same logic as direction
 };
 
 class MappedInstances
@@ -45,13 +50,13 @@ public:
   
   //int NumCandids() const { return m_candids.isize(); }
 
-  void AddCandidSort(int rIdx1, int rIdx2, int rPos1, int rPos2);
+  void AddCandidSort(int mIdx, int cPos, int leftUc, int rightUc, bool dir, bool ori);  
   
   string ToString() const; 
 
-  const map<int, map<int, int > >& GetAllCandids() const { return m_candids; }
+  const map<int, map<int, MappedInstance>>& GetAllCandids() const { return m_candids; }
 private:
-  map<int, map<int, int> > m_candids;
+  map<int, map<int, MappedInstance>> m_candids;
 };
 
 

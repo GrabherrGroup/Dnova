@@ -4,11 +4,11 @@
 
 #include "DPMatcher.h"
 
-float DPMatcher::FindMatchScore(const MappedInstance& mapCandid, const RSiteReads& reads) {
-  const RSiteRead& read1  = reads[mapCandid.GetFirstReadIndex()]; 
-  const RSiteRead& read2  = reads[mapCandid.GetSecondReadIndex()]; 
-  int readPos1            = mapCandid.GetFirstMatchPos();
-  int readPos2            = mapCandid.GetSecondMatchPos();
+float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2, const RSiteReads& reads) {
+  const RSiteRead& read1  = reads[dm1.Seq()];
+  const RSiteRead& read2  = reads[dm2.Seq()];
+  int readPos1            = dm1.Pos();
+  int readPos2            = dm2.Pos();
 
   bool isMatch = true;
   
@@ -30,7 +30,7 @@ float DPMatcher::FindMatchScore(const MappedInstance& mapCandid, const RSiteRead
     }
   }
   float score = (float)maxCell/max(length1, length2);
-  return maxCell;
+  return score;
 }
 
 int DPMatcher::GetScore(int hCoord, int vCoord, const vector<vector<int>>& editGrid) {

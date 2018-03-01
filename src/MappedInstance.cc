@@ -12,7 +12,7 @@ string MappedInstance::ToString() const {
   return ss.str();
 }
 
-void MappedInstances::AddCandidSort(int rIdx1, int rIdx2, int rPos1, int rPos2) {
+void MappedInstances::AddCandidSort(int mIdx, int cPos, int leftUc, int rightUc, bool dir, bool ori) {  
 /*
   // Make sure that rIdx1, rIdx2 are in increasing order (so that sorting will bring all relevant pairs together)
   if(rIdx1>rIdx2) {

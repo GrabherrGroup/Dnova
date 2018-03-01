@@ -75,14 +75,15 @@ public:
   const RSiteRead& GetRead(int rIdx) const { return m_rReads[rIdx]; }
   const RSiteReads& Reads() const { return m_rReads; }
 
-  string RSToString(int rIdx, int offset); //Convert RestSite read to string from given offset 
-  string RSToString(const Dmer& dmer);     // read index and offset provided as dmer object
+  string RSToString(int rIdx, int offset) const; //Convert RestSite read to string from given offset 
+  string RSToString(const Dmer& dmer) const;     // read index and offset provided as dmer object
 
   int  CreateRSitesPerString(const string& origString, const string& origName, RSiteReads& reads, bool addRC) const; 
 
   void BuildDmers(); 
   void FindMapInstances(float indelVariance) const;
   void FindSingleReadMapInstances(const RSiteRead& reads, int rIdx, float indelVariance) const; 
+  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const; 
   bool ValidateMatch(const Dmer& dmer1, const Dmer& dmer2) const; 
 
 protected:
