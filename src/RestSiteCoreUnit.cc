@@ -101,8 +101,6 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
     for (int nCell:neighbourCells) {
       for (auto dm2:m_dmers[nCell]) {
         int offset = dm1.Pos() - dm2.Pos();
-        bool dir   = (offset>=0)?true:false;
-        offset     = abs(offset);
         map<int, map<int, int>>::iterator it1 = checkedSeqs.find(dm1.Seq());
         map<int, int>::iterator it2;
         if(it1 != checkedSeqs.end()) { 
@@ -114,9 +112,8 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
           // Refinement check
           MatchInfo matchInfo;
           if(ValidateMatch(dm1, dm2, matchInfo)) { 
+            HandleMatch(dm1, dm2, matchInfo);
             checkedSeqs[dm1.Seq()][dm2.Seq()] = offset; 
-            char dirSign = dir?'+':'-';
-            cout << dm1.Seq() << " " << dm2.Seq() << " " << offset << " " << dirSign << endl;
             matchCount++;
           }
         }
@@ -131,6 +128,33 @@ bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchI
   float matchScore = validator.FindMatchScore(dmer1, dmer2, Reads(), matchInfo);
   if(matchScore>0.95) { return true; }
   else { return false; }
+}
+
+void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
+  int offsetBase1 = GetBasePos(dm1.Seq(), dm1.Pos());
+  int offsetBase2 = GetBasePos(dm2.Seq(), dm2.Pos());
+//cout<<offsetBase1<<" "<<offsetBase2<<endl;
+  int offset = offsetBase1 - offsetBase2;
+  bool dir   = (offset>=0)?true:false;
+  char dirSign = dir?'+':'-';
+  int endBase1 = GetBasePos(dm1, matchInfo.GetLastMatchPos1()); 
+  int endBase2 = GetBasePos(dm2, matchInfo.GetLastMatchPos2()); 
+  cout << dm1.Seq() << " " << dm2.Seq() << " " << endBase1 << " "
+       << endBase2 << " "<< abs(offset) << " " << dirSign << endl;
+//cout << matchInfo.GetLastMatchPos1() << " " << matchInfo.GetLastMatchPos2() << endl;
+}
+
+int RestSiteMapCore::GetBasePos(int seqIdx, int rsPos) const {
+  const RSiteRead& rSites = GetRead(seqIdx);
+  int cmPos; //cumulative position
+  for(int i=0; i<rsPos; i++) {
+    cmPos += rSites[i];
+  }
+  return cmPos;
+}
+
+int RestSiteMapCore::GetBasePos(const Dmer& dm, int rsPos) const {
+  return GetBasePos(dm.Seq(), rsPos);
 }
 
 string RestSiteMapCore::RSToString(int rIdx, int offset) const {

@@ -17,11 +17,11 @@ public:
   void SetSeqLen1(int sl1)       { m_seqLen1 = sl1;        }
   void SetSeqLen2(int sl2)       { m_seqLen1 = sl2;        }
  
-  int GetNumMatches()            { return m_numMatches;    }
-  int GetLastMatchPos1()         { return m_lastMatchPos1; }
-  int GetLastMatchPos2()         { return m_lastMatchPos2; }
-  int GetSeqLen1()               { return m_seqLen1;       }
-  int GetSeqLen2()               { return m_seqLen1;       }
+  int GetNumMatches() const      { return m_numMatches;    }
+  int GetLastMatchPos1() const   { return m_lastMatchPos1; }
+  int GetLastMatchPos2() const   { return m_lastMatchPos2; }
+  int GetSeqLen1() const         { return m_seqLen1;       }
+  int GetSeqLen2() const         { return m_seqLen1;       }
 
   float GetOverlapScore() { return ((float)m_numMatches/min(m_seqLen1, m_seqLen2)); }
 
