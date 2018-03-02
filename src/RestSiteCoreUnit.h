@@ -4,6 +4,7 @@
 #include <string>
 #include "RSiteReads.h"
 #include "Dmers.h"
+#include "DPMatcher.h"
 #include "MappedInstance.h"
 
 class RestSiteDataParams 
@@ -84,7 +85,7 @@ public:
   int FindMapInstances(float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
   int FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
   int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const; 
-  bool ValidateMatch(const Dmer& dmer1, const Dmer& dmer2) const; 
+  bool ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const;
 
 protected:
   RSiteReads& Reads()             { return m_rReads; }

@@ -4,7 +4,8 @@
 
 #include "DPMatcher.h"
 
-float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2, const RSiteReads& reads) {
+float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2,
+    const RSiteReads& reads, MatchInfo& mInfo) {
   const RSiteRead& read1  = reads[dm1.Seq()];
   const RSiteRead& read2  = reads[dm2.Seq()];
   int readPos1            = dm1.Pos();
@@ -17,7 +18,9 @@ float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2, const RSiteRea
   
   // lookup table for storing results of subproblems initialized with zeros
   vector<vector<int> > editGrid(length1, vector<int>(length2));
-  int maxCell = 0;
+  int maxCell_score  = 0;
+  int maxCell_hCoord = readPos1;
+  int maxCell_vCoord = readPos2;
   int windowThresh = 2; //Parameterize
   for (int hCoord = 0; hCoord <= length1; hCoord++) {
     for (int vCoord = 0; vCoord <= length2; vCoord++) {
@@ -27,12 +30,17 @@ float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2, const RSiteRea
       int dMoveAdd   = (read1[hCoord+readPos1]==read2[vCoord+readPos2])?1:0;
       int dMoveTotal = GetScore(hCoord-1, vCoord-1, editGrid) + dMoveAdd; 
       int currScore  = max(max(hMoveTotal, vMoveTotal), dMoveTotal);
-      if(currScore > maxCell) { maxCell = currScore; }
+      if(currScore > maxCell_score) { 
+        maxCell_score  = currScore; 
+        maxCell_hCoord = readPos1 + hCoord; 
+        maxCell_vCoord = readPos2 + vCoord;
+      }
       SetScore(hCoord, vCoord, currScore, editGrid);
     }
   }
+  mInfo = MatchInfo(maxCell_score, maxCell_hCoord, maxCell_vCoord, length1, length2);
   //TODO: Overlap specifc score, this needs to be extended to more score types
-  float score = (float)maxCell/min(length1, length2);
+  float score = (float)maxCell_score/min(length1, length2);
   return score;
 }
 

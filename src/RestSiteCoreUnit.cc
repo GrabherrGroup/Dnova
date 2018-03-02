@@ -3,7 +3,6 @@
 #endif
 
 #include "ryggrad/src/base/Logger.h"
-#include "DPMatcher.h"
 #include "RestSiteCoreUnit.h"
 
 
@@ -113,7 +112,8 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
         FILE_LOG(logDEBUG4) << endl << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString();
         if(dm1.IsMatch(dm2, deviations, acceptSelf)) {
           // Refinement check
-          if(ValidateMatch(dm1, dm2)) { 
+          MatchInfo matchInfo;
+          if(ValidateMatch(dm1, dm2, matchInfo)) { 
             checkedSeqs[dm1.Seq()][dm2.Seq()] = offset; 
             char dirSign = dir?'+':'-';
             cout << dm1.Seq() << " " << dm2.Seq() << " " << offset << " " << dirSign << endl;
@@ -126,9 +126,9 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
   return matchCount;
 }
 
-bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2) const {
+bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const {
   DPMatcher validator;
-  float matchScore = validator.FindMatchScore(dmer1, dmer2, Reads());
+  float matchScore = validator.FindMatchScore(dmer1, dmer2, Reads(), matchInfo);
   if(matchScore>0.95) { return true; }
   else { return false; }
 }
