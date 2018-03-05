@@ -11,6 +11,10 @@ float DPMatcher::FindMatchScore(const Dmer& dm1, const Dmer& dm2,
   int readPos1            = dm1.Pos();
   int readPos2            = dm2.Pos();
 
+  int minPos = min(readPos1, readPos2);
+  readPos1  -= minPos;
+  readPos2  -= minPos;
+
   bool isMatch = true;
   
   int length1 = read1.Size() - readPos1; 
