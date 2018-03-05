@@ -133,8 +133,6 @@ bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchI
 void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
   int offsetBase1 = GetBasePos(dm1.Seq(), dm1.Pos());
   int offsetBase2 = GetBasePos(dm2.Seq(), dm2.Pos());
-cout<<offsetBase1<<" "<<offsetBase2<<endl;
-cout<<GetBasePos(dm1, m_rReads[dm1.Seq()].Size())<<" " <<GetBasePos(dm2, m_rReads[dm2.Seq()].Size())<<endl;
   int offset = offsetBase1 - offsetBase2;
   bool dir   = (offset>=0)?true:false;
   char dirSign = dir?'+':'-';
@@ -142,7 +140,6 @@ cout<<GetBasePos(dm1, m_rReads[dm1.Seq()].Size())<<" " <<GetBasePos(dm2, m_rRead
   int endBase2 = GetBasePos(dm2, matchInfo.GetLastMatchPos2()); 
   cout << dm1.Seq() << " " << dm2.Seq() << " " << endBase1 << " "
        << endBase2 << " "<< abs(offset) << " " << dirSign << endl;
-cout << matchInfo.GetLastMatchPos1() << " " << matchInfo.GetLastMatchPos2() << endl;
 }
 
 int RestSiteMapCore::GetBasePos(int seqIdx, int rsPos) const {
