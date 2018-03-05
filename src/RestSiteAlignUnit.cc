@@ -125,6 +125,7 @@ void RestSiteGeneral::SetTargetSites(const string& fileName, bool addRC) {
   }
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
+    cout<< "Motif: " << motif << endl;
     m_rsaCores[m_motifs[motifIdx]].BuildDmers();
   }
 }
@@ -179,7 +180,6 @@ void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fi
   int matchCount = 0;
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
-    cout<<"Motif: " << motif << endl;
     int readCnt   = m_queryReads[motif].NumReads();
     int reportCnt = readCnt/1000;
     if(reportCnt == 0) { reportCnt = 1; }
