@@ -56,6 +56,7 @@ int RestSiteMapCore:: CreateRSitesPerString(const string& origString, const stri
 
 void RestSiteMapCore::BuildDmers() { 
   int dimCount = pow(TotalSiteCount()*3, 1.0/m_modelParams.DmerLength());   // Number of bins per dimension
+  if(dimCount<2) { dimCount = 2; } // implementation ease
   if(pow(dimCount, m_modelParams.DmerLength()) > 1900000000) {              //TODO parameterise
     FILE_LOG(logWARNING) << "Input data size is too large";
     dimCount = pow(1900000000, 1.0/m_modelParams.DmerLength()); 
@@ -125,7 +126,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
 
 bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const {
   DPMatcher validator;
-  float matchScore = validator.FindMatchScore(dmer1, dmer2, Reads(), matchInfo);
+  float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), matchInfo);
   if(matchScore>0.95) { return true; }
   else { return false; }
 }
@@ -136,10 +137,12 @@ void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchI
   int offset = offsetBase1 - offsetBase2;
   bool dir   = (offset>=0)?true:false;
   char dirSign = dir?'+':'-';
-  int endBase1 = GetBasePos(dm1, matchInfo.GetLastMatchPos1()); 
-  int endBase2 = GetBasePos(dm2, matchInfo.GetLastMatchPos2()); 
-  cout << dm1.Seq() << " " << dm2.Seq() << " " << endBase1 << " "
-       << endBase2 << " "<< abs(offset) << " " << dirSign << endl;
+  int startBase1 = GetBasePos(dm1, matchInfo.GetFirstMatchPos1()); 
+  int endBase1   = GetBasePos(dm1, matchInfo.GetLastMatchPos1()); 
+  int startBase2 = GetBasePos(dm2, matchInfo.GetFirstMatchPos1()); 
+  int endBase2   = GetBasePos(dm2, matchInfo.GetLastMatchPos1()); 
+  cout << dm1.Seq() << " " << dm2.Seq() << " " << startBase1 << " " << endBase1 << " "
+       << startBase2 << " "  << endBase2 << " "<< dirSign << endl;
 }
 
 int RestSiteMapCore::GetBasePos(int seqIdx, int rsPos) const {
