@@ -139,8 +139,8 @@ void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchI
   char dirSign = dir?'+':'-';
   int startBase1 = GetBasePos(dm1, matchInfo.GetFirstMatchPos1()); 
   int endBase1   = GetBasePos(dm1, matchInfo.GetLastMatchPos1()); 
-  int startBase2 = GetBasePos(dm2, matchInfo.GetFirstMatchPos1()); 
-  int endBase2   = GetBasePos(dm2, matchInfo.GetLastMatchPos1()); 
+  int startBase2 = GetBasePos(dm2, matchInfo.GetFirstMatchPos2()); 
+  int endBase2   = GetBasePos(dm2, matchInfo.GetLastMatchPos2()); 
   cout << dm1.Seq() << " " << dm2.Seq() << " " << startBase1 << " " << endBase1 << " "
        << startBase2 << " "  << endBase2 << " "<< dirSign << endl;
 }
