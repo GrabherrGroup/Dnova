@@ -174,7 +174,7 @@ void RestSiteDBMapper::SetQuerySites(const string& fileName) {
 
 void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fileNameTarget) {
   GenerateMotifs(); 
-  SetTargetSites(fileNameTarget, true);
+  SetTargetSites(fileNameTarget, !m_modelParams.IsSingleStrand());
   SetQuerySites(fileNameQuery);  
   map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
   int matchCount = 0;

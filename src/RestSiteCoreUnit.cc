@@ -108,17 +108,16 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
           it2 = it1->second.find(dm2.Seq()); 
           if(it2 != it1->second.end() && it2->second<=offset) { continue; } //Check if current sequence and offset have already been checked 
         }
-        FILE_LOG(logDEBUG4) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << endl;
+        FILE_LOG(logDEBUG3) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << endl;
         checkedSeqs[dm1.Seq()][dm2.Seq()] = offset; 
         if(dm1.IsMatch(dm2, deviations, acceptSelf)) {
           // Refinement check
-          FILE_LOG(logDEBUG4) << "verifying match" << endl;
+          FILE_LOG(logDEBUG3) << "verifying match" << endl;
           MatchInfo matchInfo;
-          if(ValidateMatch(dm1, dm2, matchInfo)) { 
-            HandleMatch(dm1, dm2, matchInfo);
-            matchCount++;
-            FILE_LOG(logDEBUG4) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
-          }
+          ValidateMatch(dm1, dm2, matchInfo); 
+          HandleMatch(dm1, dm2, matchInfo);
+          matchCount++;
+          FILE_LOG(logDEBUG3) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
         }
       }
     } 
@@ -126,11 +125,9 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
   return matchCount;
 }
 
-bool RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const {
+void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const {
   DPMatcher validator;
   float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), matchInfo);
-  if(matchScore>0.90) { return true; }
-  else { return false; }
 }
 
 void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {

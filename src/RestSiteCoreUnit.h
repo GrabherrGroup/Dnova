@@ -85,7 +85,7 @@ public:
   int FindMapInstances(float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
   int FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
   int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const; 
-  bool ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const;
+  void ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const;
   void HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const; 
   int GetBasePos(int seqIdx, int rsPos, bool inclusive) const; 
   int GetBasePos(const Dmer& dm, int rsPos, bool inclusive) const;
@@ -96,7 +96,7 @@ protected:
 private:
   string m_motif;                    /// Vector of all motifs for which restriction site reads have been generated
   RestSiteModelParams m_modelParams; /// Model Parameters
-  RestSiteDataParams m_dataParams;   /// Model Parameters
+  RestSiteDataParams m_dataParams;   /// Data Parameters
   double  m_totalSiteCnt;            /// The total of restriction site count over all reads
   RSiteReads m_rReads;               /// Restriction Site reads per motif
   Dmers  m_dmers;                    /// To build dmers from restriction site reads
