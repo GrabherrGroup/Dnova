@@ -27,6 +27,8 @@ public:
   int GetLastMatchPos2() const    { return m_lastMatchPos2;  }
   int GetSeqLen1() const          { return m_seqLen1;        }
   int GetSeqLen2() const          { return m_seqLen2;        }
+ 
+  string ToString() const;
 
   float GetOverlapScore() const;
   float GetLocalIdenityScore() const { return ((float)m_numMatches/(m_lastMatchPos1-m_firstMatchPos1)); }
