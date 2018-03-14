@@ -134,7 +134,7 @@ void RestSiteMapper::FindMatches(const string& fileNameQuery, const string& file
   GenerateMotifs(); 
   map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
   int matchCount = 0;
-  SetTargetSites(fileNameTarget, true);
+  SetTargetSites(fileNameTarget, !m_modelParams.IsSingleStrand());
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
     FILE_LOG(logDEBUG1) << "Finding matches based on motif: " << motif;

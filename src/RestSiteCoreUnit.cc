@@ -31,9 +31,9 @@ int RestSiteMapCore:: CreateRSitesPerString(const string& origString, const stri
           rr.PreDist() = n; // prefix (number of trailing bits before the first motif location)
           wrotePrefix = true; 
         }
-        mm.push_back(i-n);
+        mm.push_back(i+motifLen/2-n);
       } 
-      n = i;
+      n = i + motifLen/2; // Set point to middle of motif so that sequences are reversible
     }
     if (origString != "") {
       if(wrotePrefix) { 
