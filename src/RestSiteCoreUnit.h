@@ -74,7 +74,7 @@ public:
   int  TotalSiteCount() const              { return m_totalSiteCnt; }
   void IncTotalSiteCount(int cnt)          { m_totalSiteCnt += cnt; }
   const RSiteRead& GetRead(int rIdx) const { return m_rReads[rIdx]; }
-  const RSiteReads& Reads() const { return m_rReads; }
+  const RSiteReads& Reads() const          { return m_rReads;       }
 
   string RSToString(int rIdx, int offset) const; //Convert RestSite read to string from given offset 
   string RSToString(const Dmer& dmer) const;     // read index and offset provided as dmer object
@@ -84,9 +84,10 @@ public:
   void BuildDmers(); 
   int FindMapInstances(float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
   int FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,int>>& checkedSeqs) const; 
-  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const; 
+  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSameIdx) const; 
   void ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const;
-  void HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const; 
+  void WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const; 
+  void WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const;
   int GetBasePos(int seqIdx, int rsPos, bool inclusive) const; 
   int GetBasePos(const Dmer& dm, int rsPos, bool inclusive) const;
 

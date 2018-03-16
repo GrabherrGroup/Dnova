@@ -46,9 +46,9 @@ int RestSiteMapCore:: CreateRSitesPerString(const string& origString, const stri
   FILE_LOG(logDEBUG3) << "Adding Read: " << readIdx << "  " << rr.Name();
   if(addRC) {  
     rr.Flip();
-    rr.Name() += "_RC";
+    rr.Ori() *= -1;
     readIdx = reads.AddRead(rr);
-    FILE_LOG(logDEBUG3) << "Adding Read: " << readIdx << "  " << rr.Name();
+    FILE_LOG(logDEBUG3) << "Adding Read: " << readIdx << "  " << rr.Name() << " " << rr.Ori();
     return 2*mm.isize(); // Return the total number of sites that have been added
   }
   return mm.isize(); // Return the total number of sites that have been added
@@ -88,13 +88,14 @@ int RestSiteMapCore::FindSingleReadMapInstances(const RSiteRead& read, int rIdx,
   return HandleMappingInstance(dmers, indelVariance, checkedSeqs, true);
 }
 
-int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSelf) const {
+int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSameIdx) const {
   int matchCount = 0;
   svec<int> neighbourCells;
   neighbourCells.reserve(pow(2, m_modelParams.DmerLength()));
   svec<int> deviations;
   deviations.resize(m_modelParams.DmerLength());
   for(Dmer dm1:dmers) {
+    if(!m_modelParams.IsSingleStrand() && (dm1.Seq()%2!=0)) { continue; } //If reverse complements are included they have odd indexes and should not be used as target sequence
     dm1.CalcDeviations(deviations, indelVariance, m_modelParams.CNDFCoef()); //TODO this does not need to be redone every time!
     int merLoc = m_dmers.MapNToOneDim(dm1.Data());
     neighbourCells.clear();
@@ -110,12 +111,12 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
         }
         FILE_LOG(logDEBUG3) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << endl;
         checkedSeqs[dm1.Seq()][dm2.Seq()] = offset; 
-        if(dm1.IsMatch(dm2, deviations, acceptSelf)) {
+        if(dm1.IsMatch(dm2, deviations, acceptSameIdx)) {
           // Refinement check
           FILE_LOG(logDEBUG3) << "verifying match" << endl;
           MatchInfo matchInfo;
           ValidateMatch(dm1, dm2, matchInfo); 
-          HandleMatch(dm1, dm2, matchInfo);
+          WriteMatchPAF(dm1, dm2, matchInfo);
           matchCount++;
           FILE_LOG(logDEBUG3) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
         }
@@ -130,7 +131,7 @@ void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchI
   float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), matchInfo);
 }
 
-void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
+void RestSiteMapCore::WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
   int offsetBase1 = GetBasePos(dm1.Seq(), dm1.Pos(), false);
   int offsetBase2 = GetBasePos(dm2.Seq(), dm2.Pos(), false);
   int offset = offsetBase1 - offsetBase2;
@@ -144,13 +145,43 @@ void RestSiteMapCore::HandleMatch(const Dmer& dm1, const Dmer& dm2, const MatchI
        << startBase2 << " "  << endBase2 << " "<< dirSign << endl;
 }
 
+void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
+  string name_query    = GetRead(dm2.Seq()).Name();
+  int length_query     = GetBasePos(dm2, GetRead(dm2.Seq()).Size(), true); //This function will find the total length of the sequence in bases
+  int startBase_query  = GetBasePos(dm2, matchInfo.GetFirstMatchPos2(), false); 
+  int endBase_query    = GetBasePos(dm2, matchInfo.GetLastMatchPos2(), true); 
+  char strand_query    = (GetRead(dm2.Seq()).Ori()? '+': '-');
+ 
+  string name_target   = GetRead(dm1.Seq()).Name();
+  int length_target    = GetBasePos(dm1, GetRead(dm1.Seq()).Size(), true); //This function will find the total length of the sequence in bases
+  int startBase_target = GetBasePos(dm1, matchInfo.GetFirstMatchPos1(), false); 
+  int endBase_target   = GetBasePos(dm1, matchInfo.GetLastMatchPos1(), true); 
+  
+ int  numMatches      = matchInfo.GetNumMatches();
+  int  alignBlockLen   = max(endBase_query-startBase_query, endBase_target-startBase_target);
+  int  mappingQual     = 255;
+
+  char delim = '\t';
+
+  cout << name_query << delim << length_query << delim << startBase_query 
+      << delim << endBase_query << delim << strand_query << delim << name_target 
+      << delim << length_target << delim << startBase_target << delim << endBase_target
+      << delim << numMatches << delim << alignBlockLen << delim << mappingQual << endl;
+}
+
 int RestSiteMapCore::GetBasePos(int seqIdx, int rsPos, bool inclusive) const {
   const RSiteRead& rSites = GetRead(seqIdx);
   int cmPos = rSites.PreDist(); //cumulative position
   int upto = (inclusive? rsPos: rsPos-1);
+  bool includePostDist = false;
+  if(rsPos==rSites.Size()) { 
+    upto--;
+    includePostDist = true;
+  } 
   for(int i=0; i<=upto; i++) {
     cmPos += rSites[i];
   }
+  if(includePostDist) { cmPos += rSites.PostDist(); }
   return cmPos;
 }
 

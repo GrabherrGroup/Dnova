@@ -112,6 +112,7 @@ void RestSiteGeneral::SetTargetSites(const string& fileName, bool addRC) {
       }
       l.clear();
       name = parser.Line();
+      name.erase(0,1); //Remove the ">" character from name of sequence
     }
     l += parser.Line();
   }

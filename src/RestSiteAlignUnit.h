@@ -21,7 +21,6 @@ public:
   void SetTargetSites(const string& fileName, bool addRC); 
   string GetTargetName(int readIdx) const;
 
-
   virtual void WriteMatchCandids(const map<int, map<int, int> >& candids) const; 
   virtual void FindMatches(const string& fileNameQuery, const string& fileNameTarget) = 0; 
 
