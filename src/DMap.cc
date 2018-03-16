@@ -42,7 +42,7 @@ int main( int argc, char** argv )
 
   FILE* pFile               = fopen(logFile.c_str(), "w");
   Output2FILE::Stream()     = pFile;
-  FILELog::ReportingLevel() = logDEBUG2;
+  FILELog::ReportingLevel() = logDEBUG4;
 #if defined(FORCE_DEBUG)
 //    FILELog::ReportingLevel() = logDEBUG4; 
 #endif

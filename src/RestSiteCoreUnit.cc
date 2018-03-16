@@ -107,7 +107,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
         map<int, int>::iterator it2;
         if(it1 != checkedSeqs.end()) { 
           it2 = it1->second.find(dm2.Seq()); 
-          if(it2 != it1->second.end() && it2->second<=offset) { continue; } //Check if current sequence and offset have already been checked 
+          if(it2 != it1->second.end() && it2->second==offset) { continue; } //Check if current sequence and offset have already been checked 
         }
         FILE_LOG(logDEBUG3) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << endl;
         checkedSeqs[dm1.Seq()][dm2.Seq()] = offset; 
@@ -115,6 +115,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
           // Refinement check
           FILE_LOG(logDEBUG3) << "verifying match" << endl;
           MatchInfo matchInfo;
+//TODO these functions need to be specialized for DB vs overlap versions
           ValidateMatch(dm1, dm2, matchInfo); 
           WriteMatchPAF(dm1, dm2, matchInfo);
           matchCount++;
