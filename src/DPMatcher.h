@@ -47,8 +47,10 @@ class DPMatcher{
 public:
   DPMatcher() {} 
 
-  float FindMatch(const Dmer& dm1, const Dmer& dm2, const RSiteReads& reads, MatchInfo& mInfo) const; 
-  float FindMatch(int readIdx1, int readIdx2, int offset1, int offset2, bool matchDir, const RSiteReads& reads, MatchInfo& mInfo) const; 
+  float FindMatch(const Dmer& dm1, const Dmer& dm2, const RSiteReads& reads, 
+                  float indelVariance, float cndfCoef, MatchInfo& mInfo) const; 
+  float FindMatch(int readIdx1, int readIdx2, int offset1, int offset2, bool matchDir, 
+                  const RSiteReads& reads, float indelVariance, float cndfCoef, MatchInfo& mInfo) const; 
 
 private:
   int GetScore(int hCoord, int vCoord, const vector<vector<int>>& editGrid) const; 

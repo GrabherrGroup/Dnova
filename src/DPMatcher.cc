@@ -7,10 +7,10 @@
 #include "DPMatcher.h"
 
 float DPMatcher::FindMatch(const Dmer& dm1, const Dmer& dm2,
-  const RSiteReads& reads, MatchInfo& mInfo) const {
+  const RSiteReads& reads, float indelVariance, float cndfCoef, MatchInfo& mInfo) const {
   MatchInfo mInfo1, mInfo2;
-  FindMatch(dm1.Seq(), dm2.Seq(), dm1.Pos(), dm2.Pos(), true, reads, mInfo1);
-  FindMatch(dm1.Seq(), dm2.Seq(), dm1.Pos(), dm2.Pos(), false, reads, mInfo2);
+  FindMatch(dm1.Seq(), dm2.Seq(), dm1.Pos(), dm2.Pos(), true, reads, indelVariance, cndfCoef, mInfo1);
+  FindMatch(dm1.Seq(), dm2.Seq(), dm1.Pos(), dm2.Pos(), false, reads, indelVariance, cndfCoef, mInfo2);
   int totNumMatches = mInfo1.GetNumMatches() + mInfo2.GetNumMatches();
   int seqLen1       = mInfo1.GetSeqLen1() + mInfo2.GetSeqLen1();
   int seqLen2       = mInfo1.GetSeqLen2() + mInfo2.GetSeqLen2();
@@ -21,7 +21,7 @@ float DPMatcher::FindMatch(const Dmer& dm1, const Dmer& dm2,
 }
 
 float DPMatcher::FindMatch(int readIdx1, int readIdx2, int offset1, int offset2, bool matchDir,
-    const RSiteReads& reads, MatchInfo& mInfo) const {
+    const RSiteReads& reads, float indelVariance, float cndfCoef, MatchInfo& mInfo) const {
 
   const RSiteRead& read1  = reads[readIdx1];
   const RSiteRead& read2  = reads[readIdx2];
@@ -47,10 +47,14 @@ float DPMatcher::FindMatch(int readIdx1, int readIdx2, int offset1, int offset2,
       if(abs(hCoord-vCoord)>windowThresh) { continue; }
       int hMoveTotal = GetScore(hCoord, vCoord-1, editGrid) - 1; 
       int vMoveTotal = GetScore(hCoord-1, vCoord, editGrid) - 1; 
-      int dMoveAdd   = (read1[hCoord+offset1]==read2[vCoord+offset2])?1:0;
+      int readVal1 = read1[hCoord+offset1];
+      int readVal2 = read2[vCoord+offset2];
       if(!matchDir) {
-        dMoveAdd = (read1[offset1-hCoord]==read2[offset2-vCoord])?1:0;
+        readVal1 = read1[offset1-hCoord];
+        readVal2 = read2[offset2-vCoord];
       }
+      int deviation = sqrt(readVal1*indelVariance)*cndfCoef;
+      int dMoveAdd = (readVal1>readVal2+deviation || readVal1<readVal2-deviation)? 1 : 0;
       int dMoveTotal = GetScore(hCoord-1, vCoord-1, editGrid) + dMoveAdd; 
       int currScore  = max(max(hMoveTotal, vMoveTotal), dMoveTotal);
       if(currScore > maxCell_score) { 

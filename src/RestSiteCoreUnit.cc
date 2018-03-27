@@ -115,8 +115,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
           // Refinement check
           FILE_LOG(logDEBUG3) << "verifying match" << endl;
           MatchInfo matchInfo;
-//TODO these functions need to be specialized for DB vs overlap versions
-          ValidateMatch(dm1, dm2, matchInfo); 
+          ValidateMatch(dm1, dm2, indelVariance, matchInfo); 
           WriteMatchPAF(dm1, dm2, matchInfo);
           matchCount++;
           FILE_LOG(logDEBUG3) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
@@ -127,9 +126,9 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
   return matchCount;
 }
 
-void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, MatchInfo& matchInfo) const {
+void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo) const {
   DPMatcher validator;
-  float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), matchInfo);
+  float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), indelVariance, m_modelParams.CNDFCoef(), matchInfo);
 }
 
 void RestSiteMapCore::WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
