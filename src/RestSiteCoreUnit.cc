@@ -65,7 +65,7 @@ void RestSiteMapCore::BuildDmers() {
   m_dmers.BuildDmers(m_rReads , m_modelParams.DmerLength(), m_modelParams.MotifLength(), dimCount); 
 }
 
-int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,int>>& checkedSeqs) const {
+int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const {
   int counter       = 0;
   double matchCount = 0;
   int loopLim       = m_dmers.NumCells();
@@ -82,13 +82,13 @@ int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,int>
   return matchCount;
 }
 
-int RestSiteMapCore::FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,int>>& checkedSeqs) const {
+int RestSiteMapCore::FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const {
   svec<Dmer> dmers;
   m_dmers.GenerateDmers(read, rIdx, dmers);
   return HandleMappingInstance(dmers, indelVariance, checkedSeqs, true);
 }
 
-int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,int>>& checkedSeqs, bool acceptSameIdx) const {
+int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs, bool acceptSameIdx) const {
   int matchCount = 0;
   svec<int> neighbourCells;
   neighbourCells.reserve(pow(2, m_modelParams.DmerLength()));
@@ -103,14 +103,14 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
     for (int nCell:neighbourCells) {
       for (auto dm2:m_dmers[nCell]) {
         int offset = abs(dm1.Pos() - dm2.Pos());
-        map<int, map<int, int>>::iterator it1 = checkedSeqs.find(dm1.Seq());
-        map<int, int>::iterator it2;
+        map<int, map<int, vector<int>>>::iterator it1 = checkedSeqs.find(dm1.Seq());
+        map<int, vector<int>>::iterator it2;
         if(it1 != checkedSeqs.end()) { 
           it2 = it1->second.find(dm2.Seq()); 
-          if(it2 != it1->second.end() && it2->second==offset) { continue; } //Check if current sequence and offset have already been checked 
+          if(it2 != it1->second.end() && find(it2->second.begin(), it2->second.end(), offset)!=it2->second.end()) { continue; } //Check if current sequence and offset have already been checked 
         }
-        FILE_LOG(logDEBUG3) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << endl;
-        checkedSeqs[dm1.Seq()][dm2.Seq()] = offset; 
+        FILE_LOG(logDEBUG3) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << " offset: " << offset << endl;
+        checkedSeqs[dm1.Seq()][dm2.Seq()].push_back(offset);
         if(dm1.IsMatch(dm2, deviations, acceptSameIdx)) {
           // Refinement check
           FILE_LOG(logDEBUG3) << "verifying match" << endl;

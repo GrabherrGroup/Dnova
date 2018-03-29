@@ -133,7 +133,7 @@ void RestSiteGeneral::SetTargetSites(const string& fileName, bool addRC) {
 
 void RestSiteMapper::FindMatches(const string& fileNameQuery, const string& fileNameTarget) {
   GenerateMotifs(); 
-  map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
+  map<int, map<int, vector<int>>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
   int matchCount = 0;
   SetTargetSites(fileNameTarget, !m_modelParams.IsSingleStrand());
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
@@ -177,7 +177,7 @@ void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fi
   GenerateMotifs(); 
   SetTargetSites(fileNameTarget, !m_modelParams.IsSingleStrand());
   SetQuerySites(fileNameQuery);  
-  map<int, map<int,int>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
+  map<int, map<int, vector<int>>> checkedSeqs;  // Flagset for sequences that have been searched for a given sequence index and from a specific offset
   int matchCount = 0;
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
