@@ -41,7 +41,7 @@ bool RestSiteGeneral::ValidateMotif(const string& motif, const vector<char>& alp
   bool simple = false;
   for(int i=0; i<motifLen-1; i++) {
     alphabetCnt[motif[i]]++;
-    if(alphabetCnt[motif[i]]>=motifLen/2 ||
+    if(alphabetCnt[motif[i]]>motifLen/2 ||
       (i<motifLen-1 && motif[i]==motif[i+1])) {
       simple = true; 
       break;
@@ -50,9 +50,11 @@ bool RestSiteGeneral::ValidateMotif(const string& motif, const vector<char>& alp
   if(simple) { return false; }
 
   // 2. RC Filter (Palindrome)
-  if(motifLen%2 != 0) { return false; }
-  for(int ii=0; ii<motifLen/2; ii++) {
-    if(RCs.at(motif[ii]) != motif[motifLen-ii-1]) { return false; } 
+  if(!m_modelParams.IsSingleStrand()) {
+    if(motifLen%2 != 0) { return false; }
+    for(int ii=0; ii<motifLen/2; ii++) {
+      if(RCs.at(motif[ii]) != motif[motifLen-ii-1]) { return false; } 
+    }
   }
 
   return true;

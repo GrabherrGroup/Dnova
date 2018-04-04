@@ -30,7 +30,7 @@ public:
   inline bool IsMatch(const Dmer& otherDmer, const svec<int>& deviations, bool allowSame) const {
     if(!allowSame && m_seq == otherDmer.m_seq) { return false; } // Same sequence is not a real match
     for(int i=0; i<m_data.isize(); i++) {
-      if (m_data[i] > otherDmer.m_data[i]+deviations[i] || m_data[i] < otherDmer.m_data[i]-deviations[i])
+      if (m_data[i] < otherDmer.m_data[i]-deviations[i] || m_data[i] > otherDmer.m_data[i]+deviations[i])
         return false;
     }
     return true;

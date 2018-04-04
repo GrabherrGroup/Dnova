@@ -11,7 +11,7 @@ float DPMatcher::FindMatch(const Dmer& dm1, const Dmer& dm2,
   MatchInfo mInfo1, mInfo2;
   FindMatch(dm1.Seq(), dm2.Seq(), dm1.Pos(), dm2.Pos(), true, reads, indelVariance, cndfCoef, mInfo1);
   FindMatch(dm1.Seq(), dm2.Seq(), dm1.Pos(), dm2.Pos(), false, reads, indelVariance, cndfCoef, mInfo2);
-  int totNumMatches = mInfo1.GetNumMatches() + mInfo2.GetNumMatches();
+  int totNumMatches = mInfo1.GetNumMatches() + mInfo2.GetNumMatches() - 1; //Subtracting 1 to cater for double-counting
   int seqLen1       = mInfo1.GetSeqLen1() + mInfo2.GetSeqLen1();
   int seqLen2       = mInfo1.GetSeqLen2() + mInfo2.GetSeqLen2();
   mInfo = MatchInfo(totNumMatches, mInfo2.GetFirstMatchPos1(), mInfo1.GetLastMatchPos1(),
@@ -54,7 +54,9 @@ float DPMatcher::FindMatch(int readIdx1, int readIdx2, int offset1, int offset2,
         readVal2 = read2[offset2-vCoord];
       }
       int deviation = sqrt(readVal1*indelVariance)*cndfCoef;
-      int dMoveAdd = (readVal1>readVal2+deviation || readVal1<readVal2-deviation)? 1 : 0;
+      FILE_LOG(logDEBUG4) << "Using deviation value: " << deviation << " for matching sites.";
+      int dMoveAdd = (readVal2>=readVal1-deviation && readVal2<=readVal1+deviation)? 1 : -1;
+      if(dMoveAdd>0) { FILE_LOG(logDEBUG4) << "Using deviation value:" << deviation << " for sites: " << readVal1 << " " << readVal2; }
       int dMoveTotal = GetScore(hCoord-1, vCoord-1, editGrid) + dMoveAdd; 
       int currScore  = max(max(hMoveTotal, vMoveTotal), dMoveTotal);
       if(currScore > maxCell_score) { 
