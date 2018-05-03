@@ -31,6 +31,7 @@ public:
   string ToString() const;
 
   float GetOverlapScore() const;
+  float GetIdentScore() const;
   float GetLocalIdenityScore() const { return ((float)m_numMatches/(m_lastMatchPos1-m_firstMatchPos1)); }
 
 private:
@@ -48,13 +49,13 @@ public:
   DPMatcher() {} 
 
   float FindMatch(const Dmer& dm1, const Dmer& dm2, const RSiteReads& reads, 
-                  float indelVariance, float cndfCoef, MatchInfo& mInfo) const; 
-  float FindMatch(int readIdx1, int readIdx2, int offset1, int offset2, bool matchDir, 
-                  const RSiteReads& reads, float indelVariance, float cndfCoef, MatchInfo& mInfo) const; 
-
+                  float indelVariance, float cndfCoef, MatchInfo& mInfo,
+                  float& side1Score, float& side2Score) const; 
 private:
-  int GetScore(int hCoord, int vCoord, const vector<vector<int>>& editGrid) const; 
-  void SetScore(int hCoord, int vCoord, int setVal, vector<vector<int>>& editGrid) const; 
+  float FindMatch(int readIdx1, int readIdx2, int offset1, int offset2, bool matchDir, 
+                  const RSiteReads& reads, float indelVariance, float cndfCoef, MatchInfo& mInfo) const;
+  int LengthOfBases(int readIdx, int offset, bool dir, const RSiteReads& reads) const; //Find total length of bases for given region in given direction 
+  int GetRSiteLenForBaseLength(int readIdx, int offset, bool dir, int totLength, const RSiteReads& reads) const;
 };
 
 

@@ -60,7 +60,7 @@ void Dmers::BuildDmers(const RSiteReads& rReads , int dmerLength, int motifLengt
 }
 
 void Dmers::SetRangeBounds(int motifSize) {
-  double p1     = 1.0 / pow(4, motifSize); // for example for a motif size of 4 this will be 1/256
+  double p1     = 1.0 / pow(4, motifSize); // for example for a motif size of 4 this will be 1/256 //TODO parameterise 4
   double p2     = 1.0 - p1;                // for example for a motif size of 4 this will be 255/256
   double pC     = 0;                       // Cumulative probability
   int rangeLim  = 0;

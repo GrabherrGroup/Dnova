@@ -41,7 +41,7 @@ bool RestSiteGeneral::ValidateMotif(const string& motif, const vector<char>& alp
   bool simple = false;
   for(int i=0; i<motifLen-1; i++) {
     alphabetCnt[motif[i]]++;
-    if(alphabetCnt[motif[i]]>motifLen/2 ||
+    if(alphabetCnt[motif[i]]>=motifLen/2 && motifLen!=2||
       (i<motifLen-1 && motif[i]==motif[i+1])) {
       simple = true; 
       break;
@@ -141,7 +141,7 @@ void RestSiteMapper::FindMatches(const string& fileNameQuery, const string& file
   for(int motifIdx=0; motifIdx<m_modelParams.NumOfMotifs(); motifIdx++) {
     string motif = m_motifs[motifIdx];
     FILE_LOG(logDEBUG1) << "Finding matches based on motif: " << motif;
-    matchCount += m_rsaCores[motif].FindMapInstances(0.08, checkedSeqs); //TODO parameterise data params
+    matchCount += m_rsaCores[motif].FindMapInstances(0.1, checkedSeqs); //TODO parameterise data params
   }
   cout << "Total number of matches recorded: " << matchCount << endl;
 }
@@ -188,7 +188,7 @@ void RestSiteDBMapper::FindMatches(const string& fileNameQuery, const string& fi
     if(reportCnt == 0) { reportCnt = 1; }
     for(int rIdx=0; rIdx<readCnt; rIdx++) {
       FILE_LOG(logDEBUG3) << "Finding dmer match candidates for read: " << rIdx; 
-      matchCount += m_rsaCores[motif].FindSingleReadMapInstances(m_queryReads[motif][rIdx], rIdx, 0.08, checkedSeqs);
+      matchCount += m_rsaCores[motif].FindSingleReadMapInstances(m_queryReads[motif][rIdx], rIdx, 0.1, checkedSeqs);
       if (rIdx % reportCnt== 0) {
 //        cout << "\rLOG Progress: " << 100*(double)rIdx/(double)readCnt << "%" << flush;
       }

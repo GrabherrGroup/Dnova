@@ -26,6 +26,7 @@ public:
   string ToString() const;
   string ToString(int offset) const;
   void Flip();
+  void GetCumulative(RSiteRead& cRead, int offset, bool dir) const;
 
 private:
   svec<int> m_dist;       /// Distmer values

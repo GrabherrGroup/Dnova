@@ -34,6 +34,32 @@ void RSiteRead::Flip() {
   m_postDist = tmp_pp;
 }
 
+void RSiteRead::GetCumulative(RSiteRead& cRead, int offset, bool dir) const {
+  cRead.m_preDist  = m_preDist;
+  cRead.m_postDist = m_postDist;
+  cRead.m_name     = m_name;
+  cRead.m_ori      = m_ori;
+  
+  svec<int> tmp;
+  int readLen  = m_dist.isize();
+  tmp.resize(readLen);
+  int subreadLen = readLen - offset;
+  if(!dir) { subreadLen = offset; }
+  int acm      = 0; //Accumulation so far
+  for (int cnt=0; cnt<subreadLen; cnt++) {
+    if(dir) {
+      int addValue = m_dist[offset+cnt];
+      acm += addValue;
+      tmp[offset+cnt] = acm;
+    } else { 
+      int addValue = m_dist[offset-cnt]; 
+      acm += addValue;
+      tmp[offset-cnt] = acm;
+    }
+  }
+  cRead.m_dist = tmp;
+}
+
 int RSiteReads::AddRead(const RSiteRead& rr) {
   m_rReads.push_back(rr);
   m_readCount++;

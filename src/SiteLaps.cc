@@ -14,7 +14,8 @@ int main( int argc, char** argv )
   commandArg<int> motifLenCmmd("-ml","Motif Length", 6);
   commandArg<int> motifCntCmmd("-mc","Number of motifs to use", 5);
   commandArg<bool> singleStrCmmd("-s", "1: if single strand or 0: if reverse complements should also be included", 0);
-  commandArg<double> ndfcCmmd("-nc", "Coefficient to determine how much room to allow for differences in dmers", 1.0);
+  commandArg<double> ndfcCmmd1("-nc1", "Coefficient to determine how much room to allow for differences in dmers in filtering stage", 1.5);
+  commandArg<double> ndfcCmmd2("-nc2", "Coefficient to determine how much room to allow for differences in dmers in refinement stage", 3.0);
   commandArg<int>  coreCmmd("-n","Number of Cores to run with", 2);
   commandArg<string> appLogCmmd("-L","Application logging file","application.log");
   commandLineParser P(argc,argv);
@@ -24,7 +25,8 @@ int main( int argc, char** argv )
   P.registerArg(motifLenCmmd);
   P.registerArg(motifCntCmmd);
   P.registerArg(singleStrCmmd);
-  P.registerArg(ndfcCmmd);
+  P.registerArg(ndfcCmmd1);
+  P.registerArg(ndfcCmmd2);
   P.registerArg(coreCmmd);
  
   P.parse();
@@ -34,7 +36,8 @@ int main( int argc, char** argv )
   int motifLen      = P.GetIntValueFor(motifLenCmmd);
   int motifCnt      = P.GetIntValueFor(motifCntCmmd);
   bool singleStrand = P.GetBoolValueFor(singleStrCmmd);
-  double ndfCoef    = P.GetDoubleValueFor(ndfcCmmd);
+  double ndfCoef1   = P.GetDoubleValueFor(ndfcCmmd1);
+  double ndfCoef2   = P.GetDoubleValueFor(ndfcCmmd2);
   int numOfCores    = P.GetIntValueFor(coreCmmd);
     string logFile  = P.GetStringValueFor(appLogCmmd);
 
@@ -48,7 +51,7 @@ int main( int argc, char** argv )
 
   omp_set_num_threads(numOfCores); //The sort functions use OpenMP
 
-  RestSiteModelParams mParams(singleStrand, motifLen, motifCnt, dmerLen, ndfCoef); 
+  RestSiteModelParams mParams(singleStrand, motifLen, motifCnt, dmerLen, ndfCoef1, ndfCoef2); 
   RestSiteMapper rsMapper(mParams);
 
   clock_t clock1_optiLoad, clock2_overlapCand, clock3_finalOverlaps, clock4_done;

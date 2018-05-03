@@ -21,6 +21,7 @@ public:
   float  DeletionErr() const       { return m_deletionErr;     }
   float  InsertionErr() const      { return m_insertionErr;    }
   float  SubstitutionErr() const   { return m_substitutionErr; }
+  float  IndelErr() const          { return m_insertionErr + m_substitutionErr; }
 
 private: 
   bool    m_totalNumReads;    /// Flag specifying whether the reads are single or double strand
@@ -35,16 +36,18 @@ class RestSiteModelParams
 {
 public:
   RestSiteModelParams(bool singleStrand=false, int motifLength=4, int numOfMotifs=1, 
-                      int dmerLength=6, float cndfCoef=1.0, const vector<char>& alphabet= {'A', 'C', 'G', 'T' }) 
+                      int dmerLength=6, float cndfCoef1=2.0, float cndfCoef2=1.0, const vector<char>& alphabet= {'A', 'C', 'G', 'T' }) 
                      :m_singleStrand(singleStrand), m_motifLength(motifLength), m_numOfMotifs(numOfMotifs),
-                      m_dmerLength(dmerLength), m_cndfCoef(cndfCoef), m_alphabet(alphabet) { }
+                      m_dmerLength(dmerLength), m_cndfCoef1(cndfCoef1), m_cndfCoef2(cndfCoef2), m_alphabet(alphabet) { }
 
-  bool   IsSingleStrand() const        { return m_singleStrand;   }
-  int    MotifLength() const           { return m_motifLength;    }  
-  int    NumOfMotifs() const           { return m_numOfMotifs;    } 
-  int    DmerLength() const            { return m_dmerLength;     }
-  float  CNDFCoef() const              { return m_cndfCoef;       }
-  const vector<char>& Alphabet() const { return m_alphabet;       }
+  bool   IsSingleStrand() const        { return m_singleStrand;    }
+  int    MotifLength() const           { return m_motifLength;     }  
+  int    NumOfMotifs() const           { return m_numOfMotifs;     } 
+  int    DmerLength() const            { return m_dmerLength;      }
+  float  CNDFCoef1() const             { return m_cndfCoef1;       }
+  float  CNDFCoef2() const             { return m_cndfCoef2;       }
+  float  AlphabetSize() const          { return m_alphabet.size(); }
+  const vector<char>& Alphabet() const { return m_alphabet;        }
 
   void ChangeNumOfMotifs(int motifCnt) { m_numOfMotifs = motifCnt; }
 private: 
@@ -52,7 +55,8 @@ private:
   int     m_motifLength;    /// Length of each motif
   int     m_numOfMotifs;    /// Number of motifs to generate/use
   int     m_dmerLength;     /// The length of distmers to use for seed finding
-  float   m_cndfCoef;       /// Cumulative Normal Distribution Function coefficeint used for estimating similarity 
+  float   m_cndfCoef1;      /// Cumulative Normal Distribution Function coefficeint used for estimating similarity at filtering stage 
+  float   m_cndfCoef2;      /// Cumulative Normal Distribution Function coefficeint used for estimating similarity at  refinement stage
   vector<char>  m_alphabet; /// Alphabet containing base letters used in the reads/motifs in lexographic order 
 };
 
@@ -85,11 +89,13 @@ public:
   int FindMapInstances(float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const; 
   int FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const; 
   int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs, bool acceptSameIdx) const; 
-  void ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo) const;
-  void WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const; 
-  void WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const;
+  void ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
+  void WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const; 
+  void WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
   int GetBasePos(int seqIdx, int rsPos, bool inclusive) const; 
   int GetBasePos(const Dmer& dm, int rsPos, bool inclusive) const;
+  float GetMappingQuality(int blockLength) const; 
+  float GetRandomMatchProb() const;
 
 protected:
   RSiteReads& Reads()             { return m_rReads; }

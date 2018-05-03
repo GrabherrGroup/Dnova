@@ -96,7 +96,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
   deviations.resize(m_modelParams.DmerLength());
   for(Dmer dm1:dmers) {
     if(!m_modelParams.IsSingleStrand() && (dm1.Seq()%2!=0)) { continue; } //If reverse complements are included they have odd indexes and should not be used as target sequence
-    dm1.CalcDeviations(deviations, indelVariance, m_modelParams.CNDFCoef()); //TODO this does not need to be redone every time!
+    dm1.CalcDeviations(deviations, indelVariance, m_modelParams.CNDFCoef1()); //TODO this does not need to be redone every time!
     int merLoc = m_dmers.MapNToOneDim(dm1.Data());
     neighbourCells.clear();
     m_dmers.FindNeighbourCells(merLoc, dm1, deviations, neighbourCells); 
@@ -115,8 +115,9 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
           // Refinement check
           FILE_LOG(logDEBUG3) << "verifying match" << endl;
           MatchInfo matchInfo;
-          ValidateMatch(dm1, dm2, indelVariance, matchInfo); 
-          WriteMatchPAF(dm1, dm2, matchInfo);
+          float side1Score, side2Score = 0;
+          ValidateMatch(dm1, dm2, indelVariance, matchInfo, side1Score, side2Score); 
+          WriteMatchPAF(dm1, dm2, matchInfo, side1Score, side2Score);
           matchCount++;
           FILE_LOG(logDEBUG3) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
         }
@@ -126,12 +127,14 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
   return matchCount;
 }
 
-void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo) const {
+void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo,
+                                    float& side1Score, float& side2Score) const {
   DPMatcher validator;
-  float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), indelVariance, m_modelParams.CNDFCoef(), matchInfo);
+  float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), indelVariance, m_modelParams.CNDFCoef2(), matchInfo, side1Score, side2Score);
 }
 
-void RestSiteMapCore::WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
+void RestSiteMapCore::WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo,
+                                      float& side1Score, float& side2Score) const {
   int offsetBase1 = GetBasePos(dm1.Seq(), dm1.Pos(), false);
   int offsetBase2 = GetBasePos(dm2.Seq(), dm2.Pos(), false);
   int offset = offsetBase1 - offsetBase2;
@@ -145,7 +148,8 @@ void RestSiteMapCore::WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const Ma
        << startBase2 << " "  << endBase2 << " "<< dirSign << endl;
 }
 
-void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo) const {
+void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, 
+                                    float& side1Score, float& side2Score) const {
   string name_query    = GetRead(dm2.Seq()).Name();
   int length_query     = GetBasePos(dm2, GetRead(dm2.Seq()).Size(), true); //This function will find the total length of the sequence in bases
   int startBase_query  = GetBasePos(dm2, matchInfo.GetFirstMatchPos2(), false); 
@@ -157,16 +161,45 @@ void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const Matc
   int startBase_target = GetBasePos(dm1, matchInfo.GetFirstMatchPos1(), false); 
   int endBase_target   = GetBasePos(dm1, matchInfo.GetLastMatchPos1(), true); 
   
- int  numMatches      = matchInfo.GetNumMatches();
+  float matchScore     = matchInfo.GetIdentScore();
+  //int  numMatches      = matchInfo.GetNumMatches();
   int  alignBlockLen   = max(endBase_query-startBase_query, endBase_target-startBase_target);
-  int  mappingQual     = 255;
+//  int  mappingQual     = 255;
+
+  float side1Qual    = side1Score - GetMappingQuality(endBase_target-startBase_target);
+  float side2Qual    = side2Score - GetMappingQuality(endBase_query-startBase_query);
+  float  mappingQual = (side1Qual*(endBase_target-startBase_target)+side2Qual*(endBase_query-startBase_query))/alignBlockLen;
 
   char delim = '\t';
 
   cout << name_query << delim << length_query << delim << startBase_query 
       << delim << endBase_query << delim << strand_query << delim << name_target 
       << delim << length_target << delim << startBase_target << delim << endBase_target
-      << delim << numMatches << delim << alignBlockLen << delim << mappingQual << endl;
+      << delim << matchScore << delim << alignBlockLen << delim << mappingQual << delim << side1Qual << delim << side2Qual << endl;
+}
+
+float RestSiteMapCore::GetMappingQuality(int blockLength) const { 
+  float steps        = (blockLength/pow(m_modelParams.AlphabetSize(), m_modelParams.MotifLength()))/400.0;
+  float qualityScore = 0.45 + 0.2*(1-exp(-steps));
+  return qualityScore;
+}
+
+float RestSiteMapCore::GetRandomMatchProb() const {
+  float rho       = 1.0/pow(m_modelParams.AlphabetSize(), m_modelParams.MotifLength());
+  float theta     = 1 - rho;
+  int maxSep      = (1.0/rho)*10.0;
+  float alphaPrem = 0;
+  for(int sep=0; sep<maxSep; sep++) {
+    float thetaSum = 0;
+    int tsLim    = m_modelParams.CNDFCoef2()*sqrt(sep*m_dataParams.IndelErr());
+    for(int i=0; i<=tsLim; i++) {
+      thetaSum += pow(theta, i);
+    }
+    float toAdd = rho*pow(theta, sep) * rho*pow(theta, sep) * thetaSum;
+    alphaPrem  += toAdd; 
+  }
+  float alpha = 2*alphaPrem - rho/2;
+  return alpha;
 }
 
 int RestSiteMapCore::GetBasePos(int seqIdx, int rsPos, bool inclusive) const {
