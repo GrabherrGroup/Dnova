@@ -94,7 +94,7 @@ public:
   void WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
   int GetBasePos(int seqIdx, int rsPos, bool inclusive) const; 
   int GetBasePos(const Dmer& dm, int rsPos, bool inclusive) const;
-  float GetMappingQuality(int blockLength) const; 
+  float GetThresholdScore() const; 
   float GetRandomMatchProb() const;
 
 protected:

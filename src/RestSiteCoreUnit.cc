@@ -166,22 +166,17 @@ void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const Matc
   int  alignBlockLen   = max(endBase_query-startBase_query, endBase_target-startBase_target);
 //  int  mappingQual     = 255;
 
-  float side1Qual    = side1Score - GetMappingQuality(endBase_target-startBase_target);
-  float side2Qual    = side2Score - GetMappingQuality(endBase_query-startBase_query);
-  float  mappingQual = (side1Qual*(endBase_target-startBase_target)+side2Qual*(endBase_query-startBase_query))/alignBlockLen;
-
   char delim = '\t';
 
   cout << name_query << delim << length_query << delim << startBase_query 
       << delim << endBase_query << delim << strand_query << delim << name_target 
       << delim << length_target << delim << startBase_target << delim << endBase_target
-      << delim << matchScore << delim << alignBlockLen << delim << mappingQual << delim << side1Qual << delim << side2Qual << endl;
+      << delim << matchScore << delim << alignBlockLen << delim << GetThresholdScore() << endl;
 }
 
-float RestSiteMapCore::GetMappingQuality(int blockLength) const { 
-  float steps        = (blockLength/pow(m_modelParams.AlphabetSize(), m_modelParams.MotifLength()))/400.0;
-  float qualityScore = 0.45 + 0.2*(1-exp(-steps));
-  return qualityScore;
+float RestSiteMapCore::GetThresholdScore() const { 
+  float thresh = 0.2 + 0.1*(1-exp(-2*(m_modelParams.CNDFCoef2()-1)));  //TODO parameterise 0.2 and save value not to recalculate everytime
+  return thresh;
 }
 
 float RestSiteMapCore::GetRandomMatchProb() const {
