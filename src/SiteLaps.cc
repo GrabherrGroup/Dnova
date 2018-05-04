@@ -10,12 +10,12 @@ int main( int argc, char** argv )
 {
 
   commandArg<string> fileCmmd("-i","input fasta file");
-  commandArg<int> dmerCmmd("-d","dmer length", 6);
-  commandArg<int> motifLenCmmd("-ml","Motif Length", 6);
-  commandArg<int> motifCntCmmd("-mc","Number of motifs to use", 5);
+  commandArg<int> dmerCmmd("-d","dmer length", 4);
+  commandArg<int> motifLenCmmd("-ml","Motif Length", 4);
+  commandArg<int> motifCntCmmd("-mc","Number of motifs to use", 1);
   commandArg<bool> singleStrCmmd("-s", "1: if single strand or 0: if reverse complements should also be included", 0);
-  commandArg<double> ndfcCmmd1("-nc1", "Coefficient to determine how much room to allow for differences in dmers in filtering stage", 1.5);
-  commandArg<double> ndfcCmmd2("-nc2", "Coefficient to determine how much room to allow for differences in dmers in refinement stage", 3.0);
+  commandArg<double> ndfcCmmd1("-nc1", "Coefficient to determine how much room to allow for differences in dmers in filtering stage", 2.5);
+  commandArg<double> ndfcCmmd2("-nc2", "Coefficient to determine how much room to allow for differences in dmers in refinement stage", 1.0);
   commandArg<int>  coreCmmd("-n","Number of Cores to run with", 2);
   commandArg<string> appLogCmmd("-L","Application logging file","application.log");
   commandLineParser P(argc,argv);
