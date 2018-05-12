@@ -16,6 +16,7 @@ int main( int argc, char** argv )
   commandArg<bool> singleStrCmmd("-s", "1: if single strand or 0: if reverse complements should also be included", 0);
   commandArg<double> ndfcCmmd1("-nc1", "Coefficient to determine how much room to allow for differences in dmers in filtering stage", 2.5);
   commandArg<double> ndfcCmmd2("-nc2", "Coefficient to determine how much room to allow for differences in dmers in refinement stage", 1.0);
+  commandArg<double> sThreshCmmd("-t", "Threshold of score for accepting a mapping at refinement stage. Default will be internally computed", -1.0);
   commandArg<int>  coreCmmd("-n","Number of Cores to run with", 2);
   commandArg<string> appLogCmmd("-L","Application logging file","application.log");
   commandLineParser P(argc,argv);
@@ -27,6 +28,7 @@ int main( int argc, char** argv )
   P.registerArg(singleStrCmmd);
   P.registerArg(ndfcCmmd1);
   P.registerArg(ndfcCmmd2);
+  P.registerArg(sThreshCmmd);
   P.registerArg(coreCmmd);
  
   P.parse();
@@ -38,6 +40,7 @@ int main( int argc, char** argv )
   bool singleStrand = P.GetBoolValueFor(singleStrCmmd);
   double ndfCoef1   = P.GetDoubleValueFor(ndfcCmmd1);
   double ndfCoef2   = P.GetDoubleValueFor(ndfcCmmd2);
+  double scoreThresh= P.GetDoubleValueFor(sThreshCmmd);
   int numOfCores    = P.GetIntValueFor(coreCmmd);
     string logFile  = P.GetStringValueFor(appLogCmmd);
 
@@ -51,7 +54,7 @@ int main( int argc, char** argv )
 
   omp_set_num_threads(numOfCores); //The sort functions use OpenMP
 
-  RestSiteModelParams mParams(singleStrand, motifLen, motifCnt, dmerLen, ndfCoef1, ndfCoef2); 
+  RestSiteModelParams mParams(singleStrand, motifLen, motifCnt, dmerLen, ndfCoef1, ndfCoef2, scoreThresh); 
   RestSiteMapper rsMapper(mParams);
 
   clock_t clock1_optiLoad, clock2_overlapCand, clock3_finalOverlaps, clock4_done;

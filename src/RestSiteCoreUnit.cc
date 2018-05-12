@@ -155,27 +155,42 @@ void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const Matc
   int startBase_query  = GetBasePos(dm2, matchInfo.GetFirstMatchPos2(), false); 
   int endBase_query    = GetBasePos(dm2, matchInfo.GetLastMatchPos2(), true); 
   char strand_query    = (GetRead(dm2.Seq()).Ori()? '+': '-');
+  // Items useful for assembly
+  int preDist_query    = GetRead(dm2.Seq()).PreDist();
+  int postDist_query   = length_query - GetRead(dm2.Seq()).PostDist();
  
   string name_target   = GetRead(dm1.Seq()).Name();
   int length_target    = GetBasePos(dm1, GetRead(dm1.Seq()).Size(), true); //This function will find the total length of the sequence in bases
   int startBase_target = GetBasePos(dm1, matchInfo.GetFirstMatchPos1(), false); 
   int endBase_target   = GetBasePos(dm1, matchInfo.GetLastMatchPos1(), true); 
+  // Items useful for assembly
+  int preDist_target   = GetRead(dm1.Seq()).PreDist();
+  int postDist_target  = length_target - GetRead(dm1.Seq()).PostDist();
   
   float matchScore     = matchInfo.GetIdentScore();
   //int  numMatches      = matchInfo.GetNumMatches();
   int  alignBlockLen   = max(endBase_query-startBase_query, endBase_target-startBase_target);
-//  int  mappingQual     = 255;
+  int  mappingQual     = 255;
 
   char delim = '\t';
 
-  cout << name_query << delim << length_query << delim << startBase_query 
-      << delim << endBase_query << delim << strand_query << delim << name_target 
-      << delim << length_target << delim << startBase_target << delim << endBase_target
-      << delim << matchScore << delim << alignBlockLen << delim << GetThresholdScore() << endl;
+  if(matchScore>GetThresholdScore()) {
+    cout << name_query << delim << length_query << delim << startBase_query 
+        << delim << endBase_query << delim << strand_query << delim << name_target 
+        << delim << length_target << delim << startBase_target << delim << endBase_target
+        << delim << matchScore << delim << alignBlockLen << delim << mappingQual << delim;
+    //Auxillary info:
+    cout << "queryPreDist:" << preDist_query << delim << "queryPostDist:" << postDist_query << delim 
+         << "targetPreDist:" << preDist_target << delim << "targetPostDist:" << postDist_target;
+    cout << endl;
+  }
 }
 
 float RestSiteMapCore::GetThresholdScore() const { 
-  float thresh = 0.2 + 0.1*(1-exp(-2*(m_modelParams.CNDFCoef2()-1)));  //TODO parameterise 0.2 and save value not to recalculate everytime
+  float thresh = m_modelParams.ScoreThreshold(); 
+  if(thresh<0) { //Automatic computation
+    thresh = 0.2 + 0.1*(1-exp(-2*(m_modelParams.CNDFCoef2()-1)));  //TODO parameterise and save value not to recalculate everytime
+  }
   return thresh;
 }
 

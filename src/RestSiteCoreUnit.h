@@ -36,9 +36,11 @@ class RestSiteModelParams
 {
 public:
   RestSiteModelParams(bool singleStrand=false, int motifLength=4, int numOfMotifs=1, 
-                      int dmerLength=6, float cndfCoef1=2.0, float cndfCoef2=1.0, const vector<char>& alphabet= {'A', 'C', 'G', 'T' }) 
+                      int dmerLength=6, float cndfCoef1=2.0, float cndfCoef2=1.0, 
+                      float sThresh =0.2, const vector<char>& alphabet= {'A', 'C', 'G', 'T' }) 
                      :m_singleStrand(singleStrand), m_motifLength(motifLength), m_numOfMotifs(numOfMotifs),
-                      m_dmerLength(dmerLength), m_cndfCoef1(cndfCoef1), m_cndfCoef2(cndfCoef2), m_alphabet(alphabet) { }
+                      m_dmerLength(dmerLength), m_cndfCoef1(cndfCoef1), m_cndfCoef2(cndfCoef2), 
+                      m_scoreThresh(sThresh), m_alphabet(alphabet) { }
 
   bool   IsSingleStrand() const        { return m_singleStrand;    }
   int    MotifLength() const           { return m_motifLength;     }  
@@ -46,7 +48,8 @@ public:
   int    DmerLength() const            { return m_dmerLength;      }
   float  CNDFCoef1() const             { return m_cndfCoef1;       }
   float  CNDFCoef2() const             { return m_cndfCoef2;       }
-  float  AlphabetSize() const          { return m_alphabet.size(); }
+  float  ScoreThreshold() const        { return m_scoreThresh;     }
+  int    AlphabetSize() const          { return m_alphabet.size(); }
   const vector<char>& Alphabet() const { return m_alphabet;        }
 
   void ChangeNumOfMotifs(int motifCnt) { m_numOfMotifs = motifCnt; }
@@ -57,6 +60,7 @@ private:
   int     m_dmerLength;     /// The length of distmers to use for seed finding
   float   m_cndfCoef1;      /// Cumulative Normal Distribution Function coefficeint used for estimating similarity at filtering stage 
   float   m_cndfCoef2;      /// Cumulative Normal Distribution Function coefficeint used for estimating similarity at  refinement stage
+  float   m_scoreThresh;    /// Score threshold for accepting alignment refinement 
   vector<char>  m_alphabet; /// Alphabet containing base letters used in the reads/motifs in lexographic order 
 };
 
