@@ -43,10 +43,9 @@ int RestSiteMapCore:: CreateRSitesPerString(const string& origString, const stri
   } 
   rr.Dist() = mm;
   int readIdx = reads.AddRead(rr);
-  FILE_LOG(logDEBUG3) << "Adding Read: " << readIdx << "  " << rr.Name();
+  FILE_LOG(logDEBUG3) << "Adding Read: " << readIdx << "  " << rr.Name() << " " << rr.Ori();
   if(addRC) {  
     rr.Flip();
-    rr.Ori() *= -1;
     readIdx = reads.AddRead(rr);
     FILE_LOG(logDEBUG3) << "Adding Read: " << readIdx << "  " << rr.Name() << " " << rr.Ori();
     return 2*mm.isize(); // Return the total number of sites that have been added
@@ -95,7 +94,8 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
   svec<int> deviations;
   deviations.resize(m_modelParams.DmerLength());
   for(Dmer dm1:dmers) {
-    if(!m_modelParams.IsSingleStrand() && (dm1.Seq()%2!=0)) { continue; } //If reverse complements are included they have odd indexes and should not be used as target sequence
+    //TODO the condition underneath has to be included if mapping mode is used instead of overlap mode
+    //if(!m_modelParams.IsSingleStrand() && (dm1.Seq()%2!=0)) { continue; } //If reverse complements are included they have odd indexes and should not be used as target sequence
     dm1.CalcDeviations(deviations, indelVariance, m_modelParams.CNDFCoef1()); //TODO this does not need to be redone every time!
     int merLoc = m_dmers.MapNToOneDim(dm1.Data());
     neighbourCells.clear();
@@ -154,7 +154,7 @@ void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const Matc
   int length_query     = GetBasePos(dm2, GetRead(dm2.Seq()).Size(), true); //This function will find the total length of the sequence in bases
   int startBase_query  = GetBasePos(dm2, matchInfo.GetFirstMatchPos2(), false); 
   int endBase_query    = GetBasePos(dm2, matchInfo.GetLastMatchPos2(), true); 
-  char strand_query    = (GetRead(dm2.Seq()).Ori()? '+': '-');
+  char strand_query    = (GetRead(dm2.Seq()).Ori()>0? '+': '-');
   // Items useful for assembly
   int preDist_query    = GetRead(dm2.Seq()).PreDist();
   int postDist_query   = length_query - GetRead(dm2.Seq()).PostDist();
