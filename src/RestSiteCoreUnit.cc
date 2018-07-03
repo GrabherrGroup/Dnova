@@ -53,6 +53,7 @@ int RestSiteMapCore:: CreateRSitesPerString(const string& origString, const stri
   return mm.isize(); // Return the total number of sites that have been added
 }
 
+//TODO this is a very rough way of estimating memory and should be improved 
 void RestSiteMapCore::BuildDmers() { 
   int dimCount = pow(TotalSiteCount()*3, 1.0/m_modelParams.DmerLength());   // Number of bins per dimension
   if(dimCount<2) { dimCount = 2; } // implementation ease
@@ -68,6 +69,11 @@ int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,vect
   int counter       = 0;
   double matchCount = 0;
   int loopLim       = m_dmers.NumCells();
+  svec<int> neighbourCells;
+  neighbourCells.reserve(pow(2, m_modelParams.DmerLength()));
+  svec<int> deviations;
+  deviations.resize(m_modelParams.DmerLength());
+
   for (int iterIndex=0; iterIndex<loopLim; iterIndex++) {
     counter++;
     if (counter % 100000 == 0) {
@@ -75,30 +81,20 @@ int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,vect
     }
     if(!m_dmers[iterIndex].empty()) {
       FILE_LOG(logDEBUG2) << "Number of dmers in cell " << iterIndex << " " << m_dmers[iterIndex].isize(); 
-      matchCount += HandleMappingInstance(m_dmers[iterIndex], indelVariance, checkedSeqs, false);
+      matchCount += HandleMappingInstance(m_dmers[iterIndex], indelVariance, checkedSeqs, neighbourCells, deviations, false);
     }
   }
   return matchCount;
 }
 
-int RestSiteMapCore::FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const {
-  svec<Dmer> dmers;
-  m_dmers.GenerateDmers(read, rIdx, dmers);
-  return HandleMappingInstance(dmers, indelVariance, checkedSeqs, true);
-}
-
-int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs, bool acceptSameIdx) const {
+int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs,
+                                           svec<int>& neighbourCells, svec<int>& deviations, bool acceptSameIdx) const {
   int matchCount = 0;
-  svec<int> neighbourCells;
-  neighbourCells.reserve(pow(2, m_modelParams.DmerLength()));
-  svec<int> deviations;
-  deviations.resize(m_modelParams.DmerLength());
-  for(Dmer dm1:dmers) {
-    //TODO the condition underneath has to be included if mapping mode is used instead of overlap mode
-    //if(!m_modelParams.IsSingleStrand() && (dm1.Seq()%2!=0)) { continue; } //If reverse complements are included they have odd indexes and should not be used as target sequence
+   for(Dmer dm1:dmers) {
+    neighbourCells.clear();
+    deviations.clear();
     dm1.CalcDeviations(deviations, indelVariance, m_modelParams.CNDFCoef1()); //TODO this does not need to be redone every time!
     int merLoc = m_dmers.MapNToOneDim(dm1.Data());
-    neighbourCells.clear();
     m_dmers.FindNeighbourCells(merLoc, dm1, deviations, neighbourCells); 
     for (int nCell:neighbourCells) {
       for (auto dm2:m_dmers[nCell]) {

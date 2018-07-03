@@ -43,19 +43,4 @@ public:
 private:
 };
 
-class RestSiteDBMapper : public RestSiteGeneral 
-{
-public:
-  RestSiteDBMapper() {} 
-  RestSiteDBMapper(const RestSiteModelParams& mParams): RestSiteGeneral(mParams) {}
-
-  virtual void FindMatches(const string& fileNameQuery, const string& fileNameTarget); 
-  void SetQuerySites(const string& fileName); 
-  string GetQueryName(int readIdx) const; 
-  //void WriteMatchCandids(const map<int, map<int, int> >& candids) const; 
-
-private:
-  map<string, RSiteReads> m_queryReads;          /// Query Restriction Site reads per motif 
-};
-
 #endif //OPTIMAPALIGNUNIT_H

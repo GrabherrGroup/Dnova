@@ -91,8 +91,8 @@ public:
 
   void BuildDmers(); 
   int FindMapInstances(float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const; 
-  int FindSingleReadMapInstances(const RSiteRead& read, int rIdx, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const; 
-  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs, bool acceptSameIdx) const; 
+  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs,
+                            svec<int>& neighbourCells, svec<int>& deviations, bool acceptSameIdx) const;
   void ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
   void WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const; 
   void WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
