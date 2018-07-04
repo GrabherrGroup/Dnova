@@ -65,7 +65,7 @@ void RestSiteMapCore::BuildDmers() {
   m_dmers.BuildDmers(m_rReads , m_modelParams.DmerLength(), m_modelParams.MotifLength(), dimCount); 
 }
 
-int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const {
+int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,bool>>& checkedSeqs) const {
   int counter       = 0;
   double matchCount = 0;
   int loopLim       = m_dmers.NumCells();
@@ -87,7 +87,7 @@ int RestSiteMapCore::FindMapInstances(float indelVariance, map<int, map<int,vect
   return matchCount;
 }
 
-int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs,
+int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,bool>>& checkedSeqs,
                                            svec<int>& neighbourCells, svec<int>& deviations, bool acceptSameIdx) const {
   int matchCount = 0;
    for(Dmer dm1:dmers) {
@@ -98,24 +98,23 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
     m_dmers.FindNeighbourCells(merLoc, dm1, deviations, neighbourCells); 
     for (int nCell:neighbourCells) {
       for (auto dm2:m_dmers[nCell]) {
-        int offset = abs(dm1.Pos() - dm2.Pos());
-        map<int, map<int, vector<int>>>::iterator it1 = checkedSeqs.find(dm1.Seq());
-        map<int, vector<int>>::iterator it2;
-        if(it1 != checkedSeqs.end()) { 
-          it2 = it1->second.find(dm2.Seq()); 
-          if(it2 != it1->second.end() && find(it2->second.begin(), it2->second.end(), offset)!=it2->second.end()) { continue; } //Check if current sequence and offset have already been checked 
+        if(checkedSeqs[dm1.Seq()][dm2.Seq()] || checkedSeqs[dm2.Seq()][dm1.Seq()]) {
+          continue;  //Check if current pair has not been matched already 
         }
+        int offset = abs(dm1.Pos() - dm2.Pos());
         FILE_LOG(logDEBUG3) << "Checking dmer match: dmer1 - " << dm1.ToString() << " dmer2 - " << dm2.ToString() << " offset: " << offset << endl;
-        checkedSeqs[dm1.Seq()][dm2.Seq()].push_back(offset);
         if(dm1.IsMatch(dm2, deviations, acceptSameIdx)) {
           // Refinement check
           FILE_LOG(logDEBUG3) << "verifying match" << endl;
           MatchInfo matchInfo;
           float side1Score, side2Score = 0;
           ValidateMatch(dm1, dm2, indelVariance, matchInfo, side1Score, side2Score); 
-          WriteMatchPAF(dm1, dm2, matchInfo, side1Score, side2Score);
-          matchCount++;
-          FILE_LOG(logDEBUG3) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
+          bool passed = WriteMatchPAF(dm1, dm2, matchInfo, side1Score, side2Score);
+          if(passed) {
+            checkedSeqs[dm1.Seq()][dm2.Seq()]=true;
+            matchCount++;
+            FILE_LOG(logDEBUG3) << "Matched: " << RSToString(dm1.Seq(), 0) << endl << RSToString(dm2.Seq(), 0);
+          }
         }
       }
     } 
@@ -129,22 +128,7 @@ void RestSiteMapCore::ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float 
   float matchScore = validator.FindMatch(dmer1, dmer2, Reads(), indelVariance, m_modelParams.CNDFCoef2(), matchInfo, side1Score, side2Score);
 }
 
-void RestSiteMapCore::WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo,
-                                      float& side1Score, float& side2Score) const {
-  int offsetBase1 = GetBasePos(dm1.Seq(), dm1.Pos(), false);
-  int offsetBase2 = GetBasePos(dm2.Seq(), dm2.Pos(), false);
-  int offset = offsetBase1 - offsetBase2;
-  bool dir   = (offset>=0)?true:false;
-  char dirSign = dir?'+':'-';
-  int startBase1 = GetBasePos(dm1, matchInfo.GetFirstMatchPos1(), false); 
-  int endBase1   = GetBasePos(dm1, matchInfo.GetLastMatchPos1(), true); 
-  int startBase2 = GetBasePos(dm2, matchInfo.GetFirstMatchPos2(), false); 
-  int endBase2   = GetBasePos(dm2, matchInfo.GetLastMatchPos2(), true); 
-  cout << dm1.Seq() << " " << dm2.Seq() << " " << startBase1 << " " << endBase1 << " "
-       << startBase2 << " "  << endBase2 << " "<< dirSign << endl;
-}
-
-void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, 
+bool RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, 
                                     float& side1Score, float& side2Score) const {
   string name_query    = GetRead(dm2.Seq()).Name();
   int length_query     = GetBasePos(dm2, GetRead(dm2.Seq()).Size(), true); //This function will find the total length of the sequence in bases
@@ -179,7 +163,9 @@ void RestSiteMapCore::WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const Matc
     cout << "queryPreDist:" << preDist_query << delim << "queryPostDist:" << postDist_query << delim 
          << "targetPreDist:" << preDist_target << delim << "targetPostDist:" << postDist_target;
     cout << endl;
+    return true;
   }
+  return false; //Did not pass acceptance threshold
 }
 
 float RestSiteMapCore::GetThresholdScore() const { 

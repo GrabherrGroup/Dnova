@@ -90,12 +90,11 @@ public:
   int  CreateRSitesPerString(const string& origString, const string& origName, RSiteReads& reads, bool addRC) const; 
 
   void BuildDmers(); 
-  int FindMapInstances(float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs) const; 
-  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,vector<int>>>& checkedSeqs,
+  int FindMapInstances(float indelVariance, map<int, map<int,bool>>& checkedSeqs) const; 
+  int HandleMappingInstance(const svec<Dmer>& dmers, float indelVariance, map<int, map<int,bool>>& checkedSeqs,
                             svec<int>& neighbourCells, svec<int>& deviations, bool acceptSameIdx) const;
   void ValidateMatch(const Dmer& dmer1, const Dmer& dmer2, float indelVariance, MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
-  void WriteMatchBasic(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const; 
-  void WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
+  bool WriteMatchPAF(const Dmer& dm1, const Dmer& dm2, const MatchInfo& matchInfo, float& side1Score, float& side2Score) const;
   int GetBasePos(int seqIdx, int rsPos, bool inclusive) const; 
   int GetBasePos(const Dmer& dm, int rsPos, bool inclusive) const;
   float GetThresholdScore() const; 
