@@ -98,7 +98,7 @@ int RestSiteMapCore::HandleMappingInstance(const svec<Dmer>& dmers, float indelV
     m_dmers.FindNeighbourCells(merLoc, dm1, deviations, neighbourCells); 
     for (int nCell:neighbourCells) {
       for (auto dm2:m_dmers[nCell]) {
-        if(checkedSeqs[dm1.Seq()][dm2.Seq()] || checkedSeqs[dm2.Seq()][dm1.Seq()]) {
+        if(checkedSeqs[dm1.Seq()][dm2.Seq()]) {// || checkedSeqs[dm2.Seq()][dm1.Seq()]) {
           continue;  //Check if current pair has not been matched already 
         }
         int offset = abs(dm1.Pos() - dm2.Pos());
