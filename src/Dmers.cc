@@ -4,6 +4,7 @@
 
 #include "ryggrad/src/base/Logger.h"
 #include "Dmers.h"
+#include <math.h>
 
 bool Dmer::operator < (const Dmer & m) const {
   for (int i=0; i<m_data.isize(); i++) {

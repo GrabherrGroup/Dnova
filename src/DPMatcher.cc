@@ -5,6 +5,7 @@
 #include <sstream>
 #include "ryggrad/src/base/Logger.h"
 #include "DPMatcher.h"
+#include <math.h>
 
 float DPMatcher::FindMatch(const Dmer& dm1, const Dmer& dm2,
                            const RSiteReads& reads, float indelVariance, float cndfCoef, MatchInfo& mInfo,

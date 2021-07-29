@@ -4,7 +4,7 @@
 
 #include "ryggrad/src/base/Logger.h"
 #include "RestSiteCoreUnit.h"
-
+#include <math.h>
 
 int RestSiteMapCore:: CreateRSitesPerString(const string& origString, const string& origName, RSiteReads& reads, bool addRC) const {
   if (origString == "" && origName == "") {
